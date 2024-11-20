@@ -38,10 +38,14 @@
                 console.log(response)
                 data.monitor["temperature"] = response.data["data"]["datastreams"][0]["datapoints"][0]["value"];
                 data.monitor["humidity"] = response.data["data"]["datastreams"][4]["datapoints"][0]["value"];
-                if (response.data["data"]["datastreams"][1]["datapoints"][0]["value"] === 1) {
+                if (response.data["data"]["datastreams"][1]["datapoints"][0]["value"] === 1
+                    ////获取当前时间戳与最新获得的一次Json数据的时间戳做差，如果大于3.6秒，则视为WiFi离线，反之则WiFi在线
+                    && (new Date().getTime() - response.data["data"]["datastreams"][1]["datapoints"][0]["at_timestamp"]) < 3600) {
                     data.monitor["wifiStat"] = "在线";
                     data.wifi_icon = true;
                 } else {
+                    console.log(new Date().getTime());
+                    console.log(response.data["data"]["datastreams"][1]["datapoints"][0]["at_timestamp"] / 1000);
                     data.monitor["wifiStat"] = "离线";
                     data.wifi_icon = false;
                 }
@@ -169,12 +173,22 @@
             <div class="valueBody" style="margin: 20px">
                 网络状况
                 <div>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="1.32em" height="0.9em" viewBox="0 0 34 24">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1.32em" height="0.9em" viewBox="0 0 34 24"
+                         v-if="data.wifi_icon">
                         <path fill="#00f110"
                               d="M16.807 0h-.045C10.572 0 4.942 2.4.752 6.319l.013-.012L0 7.02l3.862 3.826l.72-.66c3.201-2.952 7.494-4.763 12.21-4.763s9.009 1.81 12.222 4.774l-.012-.011l.72.66l3.862-3.826l-.765-.713A23.3 23.3 0 0 0 16.845 0h-.041h.002z"/>
                         <path fill="#00f110"
                               d="M27.405 12.03A15.67 15.67 0 0 0 16.83 7.95h-.674l-.007.015a15.72 15.72 0 0 0-9.958 4.076l.013-.012l-.787.713l3.893 3.855l.72-.63c1.791-1.606 4.171-2.587 6.78-2.587s4.989.982 6.79 2.596l-.01-.008l.72.63l3.893-3.854z"/>
                         <path fill="#00f110"
+                              d="m16.815 24l5.475-5.415l-.87-.713a7.02 7.02 0 0 0-4.625-1.5h.013h-.066a7.6 7.6 0 0 0-4.567 1.515l.02-.014l-.862.713l.795.787l3.96 3.915z"/>
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1.32em" height="0.9em" viewBox="0 0 34 24"
+                         v-else>
+                        <path fill="#999999"
+                              d="M16.807 0h-.045C10.572 0 4.942 2.4.752 6.319l.013-.012L0 7.02l3.862 3.826l.72-.66c3.201-2.952 7.494-4.763 12.21-4.763s9.009 1.81 12.222 4.774l-.012-.011l.72.66l3.862-3.826l-.765-.713A23.3 23.3 0 0 0 16.845 0h-.041h.002z"/>
+                        <path fill="#999999"
+                              d="M27.405 12.03A15.67 15.67 0 0 0 16.83 7.95h-.674l-.007.015a15.72 15.72 0 0 0-9.958 4.076l.013-.012l-.787.713l3.893 3.855l.72-.63c1.791-1.606 4.171-2.587 6.78-2.587s4.989.982 6.79 2.596l-.01-.008l.72.63l3.893-3.854z"/>
+                        <path fill="#999999"
                               d="m16.815 24l5.475-5.415l-.87-.713a7.02 7.02 0 0 0-4.625-1.5h.013h-.066a7.6 7.6 0 0 0-4.567 1.515l.02-.014l-.862.713l.795.787l3.96 3.915z"/>
                     </svg>
                     <span style="font-family: 微软雅黑,serif;margin: 7px">{{ data.monitor["wifiStat"] }}</span>
