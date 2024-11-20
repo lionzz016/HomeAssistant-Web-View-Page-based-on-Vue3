@@ -1,5 +1,5 @@
 <script setup>
-    import {reactive, ref} from "vue";
+    import {computed, reactive, ref} from "vue";
     import "@/assets/details.css";
     import requestData from "@/utils/request.js";
 
@@ -21,9 +21,33 @@
         fan_icon: false,
     })
 
-    function checkStat() {
+    const showDate = ref("");
+    const showTime = ref("");
+    let showLunarTime = ref("");
 
-    }
+    setInterval(handler => {
+        const oDate = new Date()
+        const format = () => {
+            const year = oDate.getFullYear()
+            const L_month = Math.floor((oDate.getMonth() + 1) / 10)
+            const R_month = (oDate.getMonth() + 1) % 10
+            const L_day = Math.floor(oDate.getDate() / 10)
+            const R_day = oDate.getDate() % 10
+            return year + '-' + L_month + R_month + '-' + L_day + R_day
+        }
+
+        const format2 = () => {
+            const L_hour = Math.floor(oDate.getHours() / 10).toString()
+            const R_hour = oDate.getHours() % 10
+            const L_minutes = Math.floor(oDate.getMinutes() / 10)
+            const R_minutes = oDate.getMinutes() % 10
+            const L_seconds = Math.floor(oDate.getSeconds() / 10)
+            const R_seconds = oDate.getSeconds() % 10
+            return L_hour + R_hour + ':' + L_minutes + R_minutes + ':' + L_seconds + R_seconds
+        }
+        showDate.value = format()
+        showTime.value = format2()
+    }, 1000)
 
     setInterval(handler => {
         setTimeout(() => {
@@ -39,13 +63,13 @@
                 data.monitor["temperature"] = response.data["data"]["datastreams"][0]["datapoints"][0]["value"];
                 data.monitor["humidity"] = response.data["data"]["datastreams"][4]["datapoints"][0]["value"];
                 if (response.data["data"]["datastreams"][1]["datapoints"][0]["value"] === 1
-                    ////获取当前时间戳与最新获得的一次Json数据的时间戳做差，如果大于3.6秒，则视为WiFi离线，反之则WiFi在线
-                    && (new Date().getTime() - response.data["data"]["datastreams"][1]["datapoints"][0]["at_timestamp"]) < 3600) {
+                    ////获取当前时间戳与最新获得的一次Json数据的时间戳做差，如果大于3.666秒，则视为WiFi离线，反之则WiFi在线
+                    && (new Date().getTime() - response.data["data"]["datastreams"][1]["datapoints"][0]["at_timestamp"]) < 3666) {
                     data.monitor["wifiStat"] = "在线";
                     data.wifi_icon = true;
                 } else {
                     console.log(new Date().getTime());
-                    console.log(response.data["data"]["datastreams"][1]["datapoints"][0]["at_timestamp"] / 1000);
+                    console.log(response.data["data"]["datastreams"][1]["datapoints"][0]["at_timestamp"]);
                     data.monitor["wifiStat"] = "离线";
                     data.wifi_icon = false;
                 }
@@ -86,10 +110,34 @@
         }, 1000)
     }, 1000)
 
+    setInterval(handler => {
+        requestData.get("https://www.36jxs.com/api/Commonweal/almanac", {
+            params: {
+                sun: showDate.value
+            }
+        }).then(response => {
+            console.log(response)
+            const lunar = () => {
+                const lunarMonth = response.data["data"]["LMonth"]
+                const lunarDay = response.data["data"]["LDay"]
+                const lunarTermName = response.data["data"]["SolarTermName"]
+                return lunarMonth + lunarDay + " " + lunarTermName
+            }
+            showLunarTime = lunar()
+        })
+    }, 1000)
+
+
 </script>
 
 <template>
-    <div style="display: flex; padding: 75px">
+    <div class="topBody">
+        <div style="font-family: Consolas,serif;text-align: center">{{ showDate }} {{ showTime }}</div>
+        <div style="font-family: 幼圆, serif;text-align: center; font-size: 20px;font-weight: bold">农历
+            {{ showLunarTime }}
+        </div>
+    </div>
+    <div style="display: flex; margin:0 10px 0 10px;padding: 75px">
         <div class="dataBody">
             监测值
             <div style="font-size: 25px; margin-top: 5px">Monitor</div>
@@ -105,11 +153,11 @@
             </div>
             <div class="valueBody">
                 室内湿度
-                <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 30 18">
+                <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.1em" viewBox="0 0 30 25">
                     <path fill="#14aaf5"
                           d="M7.56 17.19q0-1.32.72-3.03c.72-1.71 1.1-2.25 1.86-3.31c1.56-2.06 2.92-3.62 4.06-4.67l.75-.72c.25.26.53.5.83.72c.41.42 1.04 1.11 1.88 2.09s1.57 1.85 2.17 2.65c.71 1.01 1.32 2.1 1.81 3.25s.74 2.16.74 3.03c0 1-.19 1.95-.58 2.86s-.91 1.7-1.57 2.36s-1.45 1.19-2.37 1.58s-1.89.59-2.91.59c-1 0-1.95-.19-2.86-.57s-1.7-.89-2.36-1.55c-.66-.65-1.19-1.44-1.58-2.35s-.59-1.89-.59-2.93m2.26-2.93c0 .83.17 1.49.52 1.99c.35.49.88.74 1.59.74c.72 0 1.25-.25 1.61-.74c.35-.49.53-1.15.54-1.99c-.01-.84-.19-1.5-.54-2c-.35-.49-.89-.74-1.61-.74c-.71 0-1.24.25-1.59.74c-.35.5-.52 1.16-.52 2m1.57 0v-.35c0-.08.01-.19.02-.33s.02-.25.05-.32s.05-.16.09-.24s.09-.15.15-.18c.07-.04.14-.06.23-.06q.21 0 .33.12c.12.12.14.21.17.38c.03.18.05.32.06.45s.01.3.01.52c0 .23 0 .4-.01.52q-.015.18-.06.45c-.03.17-.09.3-.17.38s-.19.12-.33.12c-.09 0-.16-.02-.23-.06a.34.34 0 0 1-.15-.18c-.04-.08-.07-.17-.09-.24c-.02-.08-.04-.19-.05-.32c-.01-.14-.02-.25-.02-.32zm.59 7.75h1.32l4.99-10.74h-1.35zm4.3-2.99c.01.84.2 1.5.55 2c.35.49.89.74 1.6.74c.72 0 1.25-.25 1.6-.74s.52-1.16.53-2c-.01-.84-.18-1.5-.53-1.99s-.88-.74-1.6-.74c-.71 0-1.25.25-1.6.74c-.36.49-.54 1.15-.55 1.99m1.57 0c0-.23 0-.4.01-.52q.015-.18.06-.45c.045-.27.09-.3.17-.38s.19-.12.33-.12q.135 0 .24.06c.07.04.12.1.16.19s.07.17.1.24s.04.18.05.32l.01.32v.69l-.01.32l-.05.32l-.1.24l-.16.19l-.24.06q-.21 0-.33-.12c-.12-.12-.14-.21-.17-.38q-.045-.27-.06-.45c-.015-.18-.01-.3-.01-.53"/>
                 </svg>
-                <span style="font-family: 微软雅黑,serif; margin: 0 12px 0 3px; padding: 0 0 0 0">{{
+                <span style="font-family: 微软雅黑,serif; margin: 0 12px 0 2px; padding: 0 0 0 0">{{
                         data.monitor["humidity"].toFixed(1)
                     }}%</span>
             </div>

@@ -1,6 +1,6 @@
 .dataBody {
     width: 260px;
-    margin: 70px 80px 0 95px;
+    margin: 10px 80px 0 95px;
     padding: 0 10px 0 10px;
     text-align: center;
     font-size: 50px;
@@ -31,7 +31,14 @@
     border-radius: 10px;
 }
 
-.text {
-    font-family: 微软雅黑, serif;
+.topBody {
+    margin: 0 360px 0 360px;
+    padding: 10px 50px 10px 50px;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-bottom: 8px solid black;
+    border-left: 8px solid black;
+    border-right: 8px solid black;
+    background: linear-gradient(to top, #f05053, #e1eec3);
+    box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
 }
-
