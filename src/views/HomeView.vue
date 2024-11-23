@@ -32,7 +32,7 @@
             const R_month = (oDate.getMonth() + 1) % 10
             const L_day = Math.floor(oDate.getDate() / 10)
             const R_day = oDate.getDate() % 10
-            return year + '年' + L_month + R_month + '月' + L_day + R_day + "日"
+            return year + '-' + L_month + R_month + '-' + L_day + R_day
         }
 
         const format2 = () => {
@@ -48,65 +48,65 @@
         showTime.value = format2()
     }, 1000)
 
-        setInterval(handler => {
-            setTimeout(() => {
-                requestData.get("/datapoint/history-datapoints", {
-                    baseURL: "https://iot-api.heclouds.com",
-                    headers: {"authorization": "version=2022-05-01&res=products%2FHn5sqb3tOh&et=1762853395&method=md5&sign=FCyPOdCMEDExdzno8OODsA%3D%3D"},
-                    params: {
-                        product_id: "Hn5sqb3tOh",
-                        device_name: "monitor",
-                    }
-                }).then(response => {
-                    console.log(response)
-                    data.monitor.temperature = response.data["data"]["datastreams"][0]["datapoints"][0]["value"];
-                    data.monitor.humidity = response.data["data"]["datastreams"][4]["datapoints"][0]["value"];
-                    if (response.data["data"]["datastreams"][1]["datapoints"][0]["value"] === 1
-                        ////获取当前时间戳与最新获得的一次Json数据的时间戳做差，如果大于3.666秒，则视为WiFi离线，反之则WiFi在线
-                        && (new Date().getTime() - response.data["data"]["datastreams"][1]["datapoints"][0]["at_timestamp"]) < 3666) {
-                        data.monitor.wifiStat = true;
-                        data.wifi = "在线";
-                    } else {
-                        console.log(new Date().getTime());
-                        console.log(response.data["data"]["datastreams"][1]["datapoints"][0]["at_timestamp"]);
-                        data.monitor.wifiStat = false;
-                        data.wifi = "离线";
-                    }
-                    if (response.data["data"]["datastreams"][3]["datapoints"][0]["value"] === 1) {
-                        data.monitor.lightStat = true;
-                        data.light_icon = true;
-                    } else {
-                        data.monitor.lightStat = false;
-                        data.light_icon = false;
-                    }
-                    if (response.data["data"]["datastreams"][2]["datapoints"][0]["value"] === 1) {
-                        data.monitor.fanStat = true;
-                        data.fan_icon = true;
-                    } else {
-                        data.monitor.fanStat = false;
-                        data.fan_icon = false;
-                    }
-                })
-            }, 0)
-        }, 1000)
+    setInterval(handler => {
+        setTimeout(() => {
+            requestData.get("/datapoint/history-datapoints", {
+                baseURL: "https://iot-api.heclouds.com",
+                headers: {"authorization": "version=2022-05-01&res=products%2FHn5sqb3tOh&et=1762853395&method=md5&sign=FCyPOdCMEDExdzno8OODsA%3D%3D"},
+                params: {
+                    product_id: "Hn5sqb3tOh",
+                    device_name: "monitor",
+                }
+            }).then(response => {
+                console.log(response)
+                data.monitor.temperature = response.data["data"]["datastreams"][0]["datapoints"][0]["value"];
+                data.monitor.humidity = response.data["data"]["datastreams"][4]["datapoints"][0]["value"];
+                if (response.data["data"]["datastreams"][1]["datapoints"][0]["value"] === 1
+                    ////获取当前时间戳与最新获得的一次Json数据的时间戳做差，如果大于3.666秒，则视为WiFi离线，反之则WiFi在线
+                    && (new Date().getTime() - response.data["data"]["datastreams"][1]["datapoints"][0]["at_timestamp"]) < 3666) {
+                    data.monitor.wifiStat = true;
+                    data.wifi = "在线";
+                } else {
+                    console.log(new Date().getTime());
+                    console.log(response.data["data"]["datastreams"][1]["datapoints"][0]["at_timestamp"]);
+                    data.monitor.wifiStat = false;
+                    data.wifi = "离线";
+                }
+                if (response.data["data"]["datastreams"][3]["datapoints"][0]["value"] === 1) {
+                    data.monitor.lightStat = true;
+                    data.light_icon = true;
+                } else {
+                    data.monitor.lightStat = false;
+                    data.light_icon = false;
+                }
+                if (response.data["data"]["datastreams"][2]["datapoints"][0]["value"] === 1) {
+                    data.monitor.fanStat = true;
+                    data.fan_icon = true;
+                } else {
+                    data.monitor.fanStat = false;
+                    data.fan_icon = false;
+                }
+            })
+        }, 0)
+    }, 1000)
 
-        setInterval(() => {
-            setTimeout(() => {
-                requestData.get("/v3/weather/now.json", {
-                    baseURL: "https://api.seniverse.com",
-                    params: {
-                        key: "SPIRhXLh-dt5N2tga",
-                        location: "Guangzhou",
-                        language: "zh-Hans",
-                        unit: "c",
-                    }
-                }).then(response => {
-                    data.weather.city = response.data["results"][0]["location"]["name"]
-                    data.weather.weather = response.data["results"][0]["now"]["text"]
-                    data.weather.temp = response.data["results"][0]["now"]["temperature"]
-                })
-            }, 0)
-        }, 1000)
+    setInterval(() => {
+        setTimeout(() => {
+            requestData.get("/v3/weather/now.json", {
+                baseURL: "https://api.seniverse.com",
+                params: {
+                    key: "SPIRhXLh-dt5N2tga",
+                    location: "Guangzhou",
+                    language: "zh-Hans",
+                    unit: "c",
+                }
+            }).then(response => {
+                data.weather.city = response.data["results"][0]["location"]["name"]
+                data.weather.weather = response.data["results"][0]["now"]["text"]
+                data.weather.temp = response.data["results"][0]["now"]["temperature"]
+            })
+        }, 0)
+    }, 5000)
 
     setInterval(handler => {
         requestData.get("https://www.36jxs.com/api/Commonweal/almanac", {
@@ -134,7 +134,7 @@
         return new Promise((resolve1) => {
             setTimeout(() => {
                 loading1.value = false
-                ElMessage.success('Switch success')
+                // ElMessage.success('Switch success')
                 return resolve1(true)
             }, 1200)
         })
@@ -145,7 +145,7 @@
         return new Promise((resolve2) => {
             setTimeout(() => {
                 loading2.value = false
-                ElMessage.success('Switch success')
+                // ElMessage.success('Switch success')
                 return resolve2(true)
             }, 1200)
         })
